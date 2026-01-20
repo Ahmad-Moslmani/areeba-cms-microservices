@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/transaction_db?currentSchema=transaction_test
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:sa}
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        default_schema: transaction_test

@@ -1,0 +1,93 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=sa
+    volumes:
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  account-service:
+    image: ahmadmoslmani/account-service:latest
+    container_name: account-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_HOST=postgres
+    healthcheck:
+      test: "curl --fail --silent localhost:8084/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  card-service:
+    image: ahmadmoslmani/card-service:latest
+    container_name: card-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_HOST=postgres
+      - CARD_HASH_SALT=your-secure-production-salt
+    healthcheck:
+      test: "curl --fail --silent localhost:8082/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  fraud-service:
+    image: ahmadmoslmani/fraud-service:latest
+    container_name: fraud-service
+    ports:
+      - "8088:8088"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_HOST=postgres
+    healthcheck:
+      test: "curl --fail --silent localhost:8088/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  transaction-service:
+    image: ahmadmoslmani/transaction-service:latest
+    container_name: transaction-service
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_HOST=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+      account-service:
+        condition: service_healthy
+      card-service:
+        condition: service_healthy
+      fraud-service:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

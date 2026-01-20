@@ -1,0 +1,27 @@
+package com.ahmadmouslimani.account;
+
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Contact;
+import io.swagger.v3.oas.annotations.info.Info;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+@OpenAPIDefinition(
+		info = @Info(
+				title = "Account Service REST API Documentation",
+				description = "Account microservice REST API Documentation",
+				version = "v1",
+				contact = @Contact(
+						name = "Ahmad Mouslimani",
+						email = "amd.moslmani@gmail.com"
+				)
+		)
+)
+public class AccountApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(AccountApplication.class, args);
+	}
+
+}
